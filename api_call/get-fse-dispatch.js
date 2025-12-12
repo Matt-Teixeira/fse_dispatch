@@ -1,6 +1,13 @@
 const { default: axios } = require("axios");
 
-const get_fse_dispatch = async () => {
+const [addLogEvent] = require("../utils/logger/log");
+const {
+  type: { I, W, E },
+  tag: { cal, det, cat }
+} = require("../utils/logger/enums");
+
+const get_fse_dispatch = async (run_log) => {
+  await addLogEvent(I, run_log, "get_fse_dispatch", cal, null, null);
   const odate_url = process.env.FSE_DISPATCH_URI;
   try {
     const res = await axios.get(odate_url, {
@@ -14,10 +21,19 @@ const get_fse_dispatch = async () => {
       }
     });
 
+    await addLogEvent(
+      I,
+      run_log,
+      "get_fse_dispatch",
+      det,
+      { res: res.data },
+      null
+    );
+
     return res.data;
   } catch (error) {
+    await addLogEvent(E, run_log, "fse_dispatch", cat, null, error);
     console.error("OData error:", error.response?.status, error.response?.data);
-    throw error;
   }
 };
 

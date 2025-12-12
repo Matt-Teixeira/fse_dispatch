@@ -7,7 +7,14 @@ const {
 const { map_fse_fields, normalizeFieldsForSharePoint } = require("../tools");
 const axios = require("axios");
 
-const fse_dispatch = async (action) => {
+const [addLogEvent] = require("../utils/logger/log");
+const {
+  type: { I, E },
+  tag: { cal, det, cat }
+} = require("../utils/logger/enums");
+
+const fse_dispatch = async (run_log, action) => {
+  await addLogEvent(I, run_log, "fse_dispatch", cal, { action }, null);
   try {
     const token = await get_share_point_token();
 
@@ -20,27 +27,50 @@ const fse_dispatch = async (action) => {
         console.log(data);
         break;
       case "post":
-        const acu_odata = await get_fse_dispatch();
+        const acu_odata = await get_fse_dispatch(run_log);
 
         if (!acu_odata.value.length) {
+          await addLogEvent(
+            I,
+            run_log,
+            "fse_dispatch",
+            cal,
+            { message: "No Acumatica OData" },
+            null
+          );
           console.log("\n*** NO ODATA ***");
-          console.log(acu_odata);
           return;
         }
 
-        let mapped_objs = map_fse_fields(acu_odata);
+        let mapped_objs = await map_fse_fields(run_log, acu_odata);
 
         for (let list of mapped_objs) {
-          let is_present = await get_fse_sp_one(token, list.Title);
+          let is_present = await get_fse_sp_one(run_log, token, list.Title);
 
           if (is_present) {
+            await addLogEvent(
+              I,
+              run_log,
+              "fse_dispatch",
+              det,
+              { message: `No update: ${list.Title} is already in table` },
+              null
+            );
             console.log(`\n\n${list.Title} is already in table!`);
             continue;
           }
 
           let normalized_list = normalizeFieldsForSharePoint(list);
+          await addLogEvent(
+            I,
+            run_log,
+            "fse_dispatch",
+            det,
+            { normalized_list },
+            null
+          );
 
-          let res = await post_dispatch_row(token, normalized_list);
+          let res = await post_dispatch_row(run_log, token, normalized_list);
         }
         break;
       case "get_one_field_det":
@@ -48,13 +78,14 @@ const fse_dispatch = async (action) => {
         console.log(one_field_det);
         break;
       case "get_one_title":
-        const one_field = await get_fse_sp_one(token, "SVC46341");
+        const one_field = await get_fse_sp_one(run_log, token, "SVC46341");
         console.log(one_field);
         break;
       default:
         break;
     }
   } catch (error) {
+    await addLogEvent(E, run_log, "fse_dispatch", cat, null, error);
     console.log(error);
   }
 };
@@ -64,7 +95,8 @@ function escapeODataString(str) {
   return str.replace(/'/g, "''");
 }
 
-async function get_fse_sp_one(token, title) {
+async function get_fse_sp_one(run_log, token, title) {
+  await addLogEvent(I, run_log, "get_fse_sp_one", cal, { title }, null);
   const siteId = process.env.SITE_ID;
 
   const listId = process.env.PROD_SVC_LIST;
@@ -88,10 +120,9 @@ async function get_fse_sp_one(token, title) {
       return res.data.value[0]; // existing item
     }
 
-    return null; // no match
+    return null;
   } catch (error) {
-    console.log("Error in get_fse_sp_one:", error.response?.data || error);
-    throw error;
+    await addLogEvent(E, run_log, "get_fse_sp_one", cat, null, error);
   }
 }
 

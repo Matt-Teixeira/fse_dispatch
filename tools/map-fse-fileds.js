@@ -1,50 +1,70 @@
-const map_fse_fields = (odata) => {
-  const mapped_fields_list = [];
+const [addLogEvent] = require("../utils/logger/log");
+const {
+  type: { I, W, E },
+  tag: { cal, det, cat }
+} = require("../utils/logger/enums");
 
-  for (let data of odata.value) {
-    let mod_date = new Date(data.ServiceOrderCreated);
-    data.ServiceOrderCreated = dateToExcelSerial(mod_date);
+const map_fse_fields = async (run_log, odata) => {
+  try {
+    await addLogEvent(I, run_log, "map_fse_fields", cal, null, null);
+    const mapped_fields_list = [];
 
-    let map = {
-      Title: clean(data.ServiceOrderNbr),
-      field_2: clean(data.EquipmentNbr),
-      field_14: clean(data.Contact),
-      field_15: clean(data.Description),
-      field_16: clean(data.Status),
-      field_17: clean(data.Description_2),
-      field_18: clean(data.PartsCoverage),
-      field_19: clean(data.StandardCoverageHours),
-      field_20: clean(data.ExtendedServiceHours),
-      field_21: clean(data.ExtendedPMHours),
-      field_22: clean(data.OnSiteResponseTime),
-      field_23: clean(data.PartsOrderRequirement),
-      field_24: clean(data.Shipping),
-      field_25: clean(data.AddressLine1),
-      field_26: clean(data.AddressLine2),
-      field_27: clean(data.City),
-      field_28: clean(data.State),
-      field_29: clean(data.PostalCode),
-      field_30: clean(data.Manufacturer),
-      field_31: clean(data.Modality),
-      field_32: clean(data.Model),
-      field_33: clean(data.AccountName),
-      field_34: clean(data.ServiceOrderCreatedBy),
-      field_36: clean(data.ServiceOrderCreated),
-      field_44: clean(data.Phone1),
-      DITerritory: clean(data.DITerritory),
-      PrimaryEngineer: clean(data.PrimaryEngineer),
-      SecondaryEngineer: clean(data.SecondaryEngineer),
-      PrimaryFSEEmail: clean(data.PrimaryFSEEmail),
-      SecondaryFSEEmail: clean(data.SecondaryFSEEmail),
-      PrimaryFSEEmpStatus: clean(data.PrimaryFSEEmpStatus),
-      SecondaryFSEEmpStatus: clean(data.SecondaryFSEEmpStatus),
-      Notes: clean(data.Description_3)
-    };
+    for (let data of odata.value) {
+      let mod_date = new Date(data.ServiceOrderCreated);
+      data.ServiceOrderCreated = dateToExcelSerial(mod_date);
 
-    mapped_fields_list.push(map);
+      let map = {
+        Title: clean(data.ServiceOrderNbr),
+        field_2: clean(data.EquipmentNbr),
+        field_14: clean(data.Contact),
+        field_15: clean(data.Description),
+        field_16: clean(data.Status),
+        field_17: clean(data.Description_2),
+        field_18: clean(data.PartsCoverage),
+        field_19: clean(data.StandardCoverageHours),
+        field_20: clean(data.ExtendedServiceHours),
+        field_21: clean(data.ExtendedPMHours),
+        field_22: clean(data.OnSiteResponseTime),
+        field_23: clean(data.PartsOrderRequirement),
+        field_24: clean(data.Shipping),
+        field_25: clean(data.AddressLine1),
+        field_26: clean(data.AddressLine2),
+        field_27: clean(data.City),
+        field_28: clean(data.State),
+        field_29: clean(data.PostalCode),
+        field_30: clean(data.Manufacturer),
+        field_31: clean(data.Modality),
+        field_32: clean(data.Model),
+        field_33: clean(data.AccountName),
+        field_34: clean(data.ServiceOrderCreatedBy),
+        field_36: clean(data.ServiceOrderCreated),
+        field_44: clean(data.Phone1),
+        DITerritory: clean(data.DITerritory),
+        PrimaryEngineer: clean(data.PrimaryEngineer),
+        SecondaryEngineer: clean(data.SecondaryEngineer),
+        PrimaryFSEEmail: clean(data.PrimaryFSEEmail),
+        SecondaryFSEEmail: clean(data.SecondaryFSEEmail),
+        PrimaryFSEEmpStatus: clean(data.PrimaryFSEEmpStatus),
+        SecondaryFSEEmpStatus: clean(data.SecondaryFSEEmpStatus),
+        Notes: clean(data.Description_3)
+      };
+
+      mapped_fields_list.push(map);
+    }
+
+    await addLogEvent(
+      I,
+      run_log,
+      "map_fse_fields",
+      det,
+      { mapped_fields_list },
+      null
+    );
+
+    return mapped_fields_list;
+  } catch (error) {
+    await addLogEvent(E, run_log, "map_fse_fields", cat, null, error);
   }
-
-  return mapped_fields_list;
 };
 
 const clean = (value) => {

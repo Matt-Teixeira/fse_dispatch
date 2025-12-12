@@ -1,9 +1,16 @@
 const axios = require("axios");
 
+const [addLogEvent] = require("../utils/logger/log");
+const {
+  type: { I, E },
+  tag: { cal, det, cat }
+} = require("../utils/logger/enums");
+
 /**
  * Create a new list item (row) in SharePoint via Graph
  */
-async function post_dispatch_row(token, fields) {
+async function post_dispatch_row(run_log, token, fields) {
+  await addLogEvent(I, run_log, "post_dispatch_row", cal, null, null);
   const siteId = process.env.SITE_ID;
 
   const listId = process.env.PROD_SVC_LIST;
@@ -22,15 +29,25 @@ async function post_dispatch_row(token, fields) {
       }
     );
 
+    await addLogEvent(
+      I,
+      run_log,
+      "post_dispatch_row",
+      det,
+      `Create Item: ${fields.Title}`,
+      null
+    );
+
     console.log(
       `\nCreated item: ${fields.Title}`,
       res.data.id,
       res.data.webUrl
     );
     return res.data;
-  } catch (err) {
-    console.error("Status:", err.response?.status);
-    console.error("Error body:", JSON.stringify(err.response?.data, null, 2));
+  } catch (error) {
+    await addLogEvent(E, run_log, "post_dispatch_row", cat, null, error);
+    console.error("Status:", error.response?.status);
+    console.error("Error body:", JSON.stringify(error.response?.data, null, 2));
   }
 }
 
