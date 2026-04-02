@@ -1,9 +1,11 @@
+const { get_share_point_token } = require("../api_call");
 const fetch = require("node-fetch");
 
-async function get_fse_sp_page(token) {
+async function get_fse_sp_page() {
   const siteId = process.env.SITE_ID;
-
   const listId = process.env.PROD_SVC_LIST;
+
+  const token = await get_share_point_token();
 
   const baseUrl = `https://graph.microsoft.com/v1.0/sites/${siteId}/lists/${listId}/items`;
 
@@ -30,7 +32,9 @@ async function get_fse_sp_page(token) {
     url = data["@odata.nextLink"] || null;
   }
 
-  return items;
+  console.log(items);
+
+  return;
 }
 
 async function get_fse_sp_one(token) {

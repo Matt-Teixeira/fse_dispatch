@@ -1,4 +1,4 @@
-const axios = require("axios");
+const fetch = require("node-fetch");
 
 const [addLogEvent] = require("../utils/logger/log");
 const {
@@ -18,16 +18,16 @@ async function post_dispatch_row(run_log, token, fields) {
   const url = `https://graph.microsoft.com/v1.0/sites/${siteId}/lists/${listId}/items`;
 
   try {
-    const res = await axios.post(
-      url,
-      { fields },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        }
-      }
-    );
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ fields })
+    });
+
+    const data = await res.json();
 
     await addLogEvent(
       I,
@@ -40,14 +40,13 @@ async function post_dispatch_row(run_log, token, fields) {
 
     console.log(
       `\nCreated item: ${fields.Title}`,
-      res.data.id,
-      res.data.webUrl
+      data.id,
+      data.webUrl
     );
-    return res.data;
+    return data;
   } catch (error) {
     await addLogEvent(E, run_log, "post_dispatch_row", cat, null, error);
-    console.error("Status:", error.response?.status);
-    console.error("Error body:", JSON.stringify(error.response?.data, null, 2));
+    console.error("Error:", error.message);
   }
 }
 

@@ -4,13 +4,17 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "fse_dispatch": "node index.js fse_dispatch",
+    "lists": "node index.js lists",
+    "fse_sp_items": "node index.js fse_sp_items",
+    "get_svc": "node index.js get_svc",
+    "get_field_det": "node index.js get_field_det"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "axios": "^1.13.2",
+    "node-fetch": "^2.7.0",
     "dotenv": "^17.2.3",
     "pg-promise": "^12.3.0",
     "short-uuid": "^6.0.3",

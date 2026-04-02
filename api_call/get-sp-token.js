@@ -1,4 +1,4 @@
-const axios = require("axios");
+const fetch = require("node-fetch");
 const qs = require("querystring");
 
 async function get_share_point_token() {
@@ -18,11 +18,14 @@ async function get_share_point_token() {
   };
   // scope: "https://avantehealthsolutions.sharepoint.com/.default"
 
-  const res = await axios.post(tokenUrl, qs.stringify(body), {
-    headers: { "Content-Type": "application/x-www-form-urlencoded" }
+  const res = await fetch(tokenUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: qs.stringify(body)
   });
 
-  return res.data.access_token;
+  const data = await res.json();
+  return data.access_token;
 }
 
 module.exports = get_share_point_token;

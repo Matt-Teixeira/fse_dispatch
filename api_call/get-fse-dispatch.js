@@ -1,4 +1,4 @@
-const { default: axios } = require("axios");
+const fetch = require("node-fetch");
 
 const [addLogEvent] = require("../utils/logger/log");
 const {
@@ -10,30 +10,32 @@ const get_fse_dispatch = async (run_log) => {
   await addLogEvent(I, run_log, "get_fse_dispatch", cal, null, null);
   const odate_url = process.env.FSE_DISPATCH_URI;
   try {
-    const res = await axios.get(odate_url, {
-      // Axios will build the Basic Authorization header for you
-      auth: {
-        username: process.env.PROD_LOGIN_NAME, // e.g. "admin" or "admin@TenantName"
-        password: process.env.PROD_LOGIN_PW
-      },
+    const res = await fetch(odate_url, {
       headers: {
-        Accept: "application/json"
+        Accept: "application/json",
+        Authorization:
+          "Basic " +
+          Buffer.from(
+            process.env.PROD_LOGIN_NAME + ":" + process.env.PROD_LOGIN_PW
+          ).toString("base64")
       }
     });
+
+    const data = await res.json();
 
     await addLogEvent(
       I,
       run_log,
       "get_fse_dispatch",
       det,
-      { res: res.data },
+      { res: data },
       null
     );
 
-    return res.data;
+    return data;
   } catch (error) {
     await addLogEvent(E, run_log, "fse_dispatch", cat, null, error);
-    console.error("OData error:", error.response?.status, error.response?.data);
+    console.error("OData error:", error.message);
   }
 };
 

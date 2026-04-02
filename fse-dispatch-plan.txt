@@ -1,0 +1,6 @@
+1) Create test teams channel and web hook
+2) Take the fse data, extract what I need from it, and post it as an adaptive card to the cannel. 
+2.1) I need the card to have functionality so that when I (or anyone in the channel) accepts the service order posted, there is some feedback to a listener app that confirms who accepted what. 
+3) Create listener app: not sure if I need to use sockets. Thoughts and advice on approach would be welcomed. (using node and a Debian server)
+3.1) Probably have the service order data in a Redis cache on the Debian that I can add/remove depending upon the state of the adaptive card being accepted or not. 
+4) If the card in teams is not accepted in 30 minutes, then forward that service order to a specific person. 

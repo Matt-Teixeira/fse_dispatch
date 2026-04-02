@@ -101,7 +101,34 @@ function normalizeFieldsForSharePoint(raw) {
       clean.field_36 = null;
     }
   }
+
+  if (clean.Notes) {
+    clean.Notes = htmlToSingleLineText(clean.Notes);
+  }
   return clean;
+}
+
+function htmlToSingleLineText(html) {
+  return (
+    html
+      // remove style & script blocks
+      .replace(/<style[\s\S]*?<\/style>/gi, " ")
+      .replace(/<script[\s\S]*?<\/script>/gi, " ")
+
+      // remove all HTML tags
+      .replace(/<[^>]+>/g, " ")
+
+      // decode common HTML entities
+      .replace(/&nbsp;/gi, " ")
+      .replace(/&amp;/gi, "&")
+      .replace(/&quot;/gi, '"')
+      .replace(/&#39;/gi, "'")
+
+      // collapse whitespace into a single space
+      .replace(/\s+/g, " ")
+
+      .trim()
+  );
 }
 
 module.exports = { map_fse_fields, normalizeFieldsForSharePoint };
